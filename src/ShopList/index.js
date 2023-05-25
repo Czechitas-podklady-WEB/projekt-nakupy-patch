@@ -35,15 +35,22 @@ export const ShopList = (props) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-    }).then((response) => response.json())
-      .then((data) => {
+    }).then((response) => {
+      if (response.status === 201) {
+        return response.json()
+      } else if (response.status === 401) {
+        throw "Neautorizované volání API. Pravděpodobně nemáš uveden autentizační token v Local storage."
+      } else {
+        throw `Server vrátil chybový návratový kód ${response.status} ${response.statusText}`
+      }
+    }).then((data) => {
         element.replaceWith(
           ShopList({
             day: day,
             dayResult: data.result,
           })
         );
-      });
+    }).catch(error => element.innerHTML = `<div style="color: red; font-weight: bold;">${error}</div>`);
 
     return element;
   }
